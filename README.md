@@ -14,12 +14,14 @@ The increasing availability of user data on music streaming platforms opens up n
 Dataset will be released after publication. 
 
 ## Environment
-networkx==3.3
-numpy==2.1.2
-pandas==2.2.3
-scikit-learn==1.5.2
-torch==2.4.1
-tqdm==4.66.5
+```
+networkx==3.3 
+numpy==2.1.2 
+pandas==2.2.3 
+scikit-learn==1.5.2 
+torch==2.4.1 
+tqdm==4.66.5 
+```
 
 ## Running the code
 
