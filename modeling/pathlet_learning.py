@@ -7,35 +7,35 @@ import numpy as np
 from tqdm import tqdm
 
 
-def compute_A(trajectories, all_edges_dict):
-    A = np.zeros((len(all_edges_dict), len(trajectories)))
+def compute_P(trajectories, all_edges_dict):
+    P = np.zeros((len(all_edges_dict), len(trajectories)))
     for j, p in tqdm(list(enumerate(trajectories))):
         taken_edges = [(p[i], p[i + 1]) for i in range(len(p) - 1)]
         for edge in taken_edges:
-            A[all_edges_dict[edge], j] = 1
+            P[all_edges_dict[edge], j] = 1
 
-    return A
+    return P
 
 
-def compute_B(all_edges_dict, candidates_pathlets):
-    B = np.zeros((len(all_edges_dict), len(candidates_pathlets)))
+def compute_D0(all_edges_dict, candidates_pathlets):
+    D0 = np.zeros((len(all_edges_dict), len(candidates_pathlets)))
     for i, p in tqdm(list(enumerate(candidates_pathlets))):
         taken_edges = [(p[j], p[j + 1]) for j in range(len(p) - 1)]
         for edge in taken_edges:
             try:
-                B[all_edges_dict[edge], i] = 1
+                D0[all_edges_dict[edge], i] = 1
             except KeyError:
                 pass
-    return B
+    return D0
 
 
 class PathletLearning:
-    def __init__(self, A, B, candidates_pathlets, kwargs):
+    def __init__(self, P, D0, candidates_pathlets, kwargs):
 
-        self.A_ = torch.from_numpy(A)
-        self.B_ = torch.from_numpy(B)
-        self.C_ = torch.from_numpy(np.zeros((B.shape[1], A.shape[1])))
-        self.C_.requires_grad = True
+        self.P_ = torch.from_numpy(P)
+        self.D0_ = torch.from_numpy(D0)
+        self.alpha_ = torch.from_numpy(np.zeros((D0.shape[1], P.shape[1])))
+        self.alpha_.requires_grad = True
 
         self.candidates_pathlets = candidates_pathlets
 
@@ -46,22 +46,22 @@ class PathletLearning:
         self.loss_values_term2 = []
         self.loss_values_term3 = []
 
-    def cost_term1(self, C):
+    def cost_term1(self, alpha):
 
-        value = torch.norm(self.A_ - self.B_ @ C, 2) ** 2 / 2
+        value = torch.norm(self.P_ - self.D0_ @ alpha, 2) ** 2 / 2
         return value
 
-    def cost_term2(self, C):
-        value = torch.norm(C, 1)
+    def cost_term2(self, alpha):
+        value = torch.norm(alpha, 1)
         return value
 
-    def cost_function(self, C):
+    def cost_function(self, alpha):
 
-        v1 = self.cost_term1(C)
+        v1 = self.cost_term1(alpha)
         v1_value = v1.item()
         self.loss_values_term1.append(v1_value)
 
-        v2 = self.lambda_ * self.cost_term2(C)
+        v2 = self.lambda_ * self.cost_term2(alpha)
         v2_value = v2.item()
         self.loss_values_term2.append(v2_value)
 
@@ -72,8 +72,8 @@ class PathletLearning:
 
     def build_D(self):
 
-        C = self.C_.detach().cpu().numpy()
-        mean_values = np.mean(C, axis=1)
+        alpha = self.alpha_.detach().cpu().numpy()
+        mean_values = np.mean(alpha, axis=1)
 
         kept_indices = np.argsort(mean_values)[::-1][: self.dictionary_size]
         D = [self.candidates_pathlets[i] for i in kept_indices]
@@ -81,15 +81,15 @@ class PathletLearning:
 
     def compute_dictionary(self):
 
-        optimizer = torch.optim.Adam([self.C_], lr=0.1)
+        optimizer = torch.optim.Adam([self.alpha_], lr=0.1)
 
         self.loss_values = []
         for i in tqdm(range(self.n_steps)):
-            loss = self.cost_function(self.C_)
+            loss = self.cost_function(self.alpha_)
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-            self.C_.data.clamp_(0, 1)
+            self.alpha_.data.clamp_(0, 1)
             if i > 10 and np.mean(self.loss_values[-10:-5]) <= np.mean(
                 self.loss_values[-5:]
             ):

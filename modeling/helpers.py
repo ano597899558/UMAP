@@ -5,8 +5,8 @@ from tqdm import tqdm
 import multiprocessing as mp
 from collections import Counter
 from modeling.pathlet_learning import (
-    compute_A,
-    compute_B,
+    compute_P,
+    compute_D0,
     PathletLearning,
 )
 from modeling.trajectory_encoder import TrajEncoder
@@ -132,16 +132,16 @@ def compute_dictionary(
             for index, edge in enumerate(compute_all_edges(picked_trajectories))
         ]
     )
-    A = compute_A(picked_trajectories, all_edges_dict)
-    B = compute_B(all_edges_dict, candidates_pathlets)
+    P = compute_P(picked_trajectories, all_edges_dict)
+    D0 = compute_D0(all_edges_dict, candidates_pathlets)
 
     print(f"Number of trajectories {len(picked_trajectories)}")
     print(f"Number of candidates pathlets {len(candidates_pathlets)}")
     print(f"Number of edges  {len(all_edges_dict)}")
 
     dict_computer = PathletLearning(
-        A=A,
-        B=B,
+        P=P,
+        D0=D0,
         candidates_pathlets=candidates_pathlets,
         kwargs=learning_parameters,
     )
