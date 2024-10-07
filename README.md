@@ -29,8 +29,8 @@ The repository must contain those folders (XXXX refering to a specific dataset):
 ```
 ├── data
 │   └── XXXX/histories.csv
-├── processed_data/XXXX
-└── results/XXXX
+├── processed_data/XXXX/
+└── results/XXXX/
 ```
 
 Processing and modeling dataset, evaluation :
