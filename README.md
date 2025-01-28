@@ -1,7 +1,7 @@
 # Modeling Musical Genre Trajectories through Pathlet Learning 
 
 
-This anonymized repository provides Python code to reproduce experiments from the paper _"Modeling Musical Genre Trajectories through Pathlet Learning"_, submited to The 47th European Conference on Information Retrieval (ECIR) in the Call for Full Paper.
+This anonymized repository provides Python code to reproduce experiments from the paper _"Modeling Musical Genre Trajectories through Pathlet Learning"_, submited to the 33rd ACM International Conference on User Modeling, Adaptation and Personalization (UMAP 2025) in the Call for Full Paper.
 
 
 ## Abstract
